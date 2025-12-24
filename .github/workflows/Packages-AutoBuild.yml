@@ -10,9 +10,9 @@ name: Packages-AutoBuild
 
 on: 
   repository_dispatch:
-  # push: 
-  #   branches:
-  #     - master
+  push: 
+    tags:
+      - v*
   # schedule:
   #   - cron: 0 1 */1 * *
 
@@ -105,34 +105,8 @@ jobs:
         echo "$REPO_BRANCH"
         if [[ "${{matrix.target}}" == "mipsel_24kc" ]]; then
         	SDK_PATH="releases/$REPO_BRANCH/targets/ramips/mt7621/openwrt-sdk-$REPO_BRANCH-ramips-mt7621_gcc-14.3.0_musl.Linux-x86_64.tar.zst"
-        elif [[ "${{matrix.target}}" == "mips_24kc" ]]; then
-        	SDK_PATH="releases/$REPO_BRANCH/targets/ath79/nand/openwrt-sdk-$REPO_BRANCH-ath79-nand_gcc-14.3.0_musl.Linux-x86_64.tar.zst"
-        elif [[ "${{matrix.target}}" == "x86_64" ]]; then
-        	SDK_PATH="releases/$REPO_BRANCH/targets/x86/64/openwrt-sdk-$REPO_BRANCH-x86-64_gcc-14.3.0_musl.Linux-x86_64.tar.zst"
-        elif [[ "${{matrix.target}}" == "i386_pentium4" ]]; then
-        	SDK_PATH="releases/$REPO_BRANCH/targets/x86/generic/openwrt-sdk-$REPO_BRANCH-x86-generic_gcc-14.3.0_musl.Linux-x86_64.tar.zst"
-        elif [[ "${{matrix.target}}" == "aarch64_generic" ]]; then
-        	SDK_PATH="releases/$REPO_BRANCH/targets/rockchip/armv8/openwrt-sdk-$REPO_BRANCH-rockchip-armv8_gcc-14.3.0_musl.Linux-x86_64.tar.zst"
-        elif [[ "${{matrix.target}}" == "arm_arm1176jzf-s_vfp" ]]; then
-        	SDK_PATH="releases/$REPO_BRANCH/targets/bcm27xx/bcm2708/openwrt-sdk-$REPO_BRANCH-bcm27xx-bcm2708_gcc-14.3.0_musl_eabi.Linux-x86_64.tar.zst"
-        elif [[ "${{matrix.target}}" == "arm_cortex-a15_neon-vfpv4" ]]; then
-        	SDK_PATH="releases/$REPO_BRANCH/targets/ipq806x/generic/openwrt-sdk-$REPO_BRANCH-ipq806x-generic_gcc-14.3.0_musl_eabi.Linux-x86_64.tar.zst"
-        elif [[ "${{matrix.target}}" == "arm_cortex-a5_vfpv4" ]]; then
-        	SDK_PATH="releases/$REPO_BRANCH/targets/at91/sama5/openwrt-sdk-$REPO_BRANCH-at91-sama5_gcc-14.3.0_musl_eabi.Linux-x86_64.tar.zst"
-        elif [[ "${{matrix.target}}" == "aarch64_cortex-a72" ]]; then
-        	SDK_PATH="releases/$REPO_BRANCH/targets/bcm27xx/bcm2711/openwrt-sdk-$REPO_BRANCH-bcm27xx-bcm2711_gcc-14.3.0_musl.Linux-x86_64.tar.zst"
         elif [[ "${{matrix.target}}" == "aarch64_cortex-a53" ]]; then
         	SDK_PATH="releases/$REPO_BRANCH/targets/mediatek/filogic/openwrt-sdk-$REPO_BRANCH-mediatek-filogic_gcc-14.3.0_musl.Linux-x86_64.tar.zst"
-        elif [[ "${{matrix.target}}" == "arm_cortex-a7_neon-vfpv4" ]]; then
-        	SDK_PATH="releases/$REPO_BRANCH/targets/ipq40xx/generic/openwrt-sdk-$REPO_BRANCH-ipq40xx-generic_gcc-14.3.0_musl_eabi.Linux-x86_64.tar.zst"
-        elif [[ "${{matrix.target}}" == "arm_cortex-a9" ]]; then
-        	SDK_PATH="releases/$REPO_BRANCH/targets/bcm53xx/generic/openwrt-sdk-$REPO_BRANCH-bcm53xx-generic_gcc-14.3.0_musl_eabi.Linux-x86_64.tar.zst"
-        elif [[ "${{matrix.target}}" == "arm_cortex-a9_vfpv3-d16" ]]; then
-        	SDK_PATH="releases/$REPO_BRANCH/targets/mvebu/cortexa9/openwrt-sdk-$REPO_BRANCH-mvebu-cortexa9_gcc-14.3.0_musl_eabi.Linux-x86_64.tar.zst"
-        elif [[ "${{matrix.target}}" == "aarch64_cortex-a76" ]]; then
-        	SDK_PATH="releases/$REPO_BRANCH/targets/bcm27xx/bcm2712/openwrt-sdk-$REPO_BRANCH-bcm27xx-bcm2712_gcc-14.3.0_musl.Linux-x86_64.tar.zst"
-        elif [[ "${{matrix.target}}" == "riscv64_generic" ]]; then
-        	SDK_PATH="releases/$REPO_BRANCH/targets/siflower/sf21/openwrt-sdk-$REPO_BRANCH-siflower-sf21_gcc-14.3.0_musl.Linux-x86_64.tar.zst"
         fi
 
         PRIMARY_URL="https://downloads.openwrt.org/$SDK_PATH"
@@ -311,21 +285,6 @@ jobs:
         name: ${{ env.NAME }}
         tag_name: ${{ env.date }}_${{matrix.target}}
         body_path: release.txt
-
-    - name: deploy files to server
-      uses: easingthemes/ssh-deploy@main
-      if: env.SSH_PRIVATE_KEY && ! contains(github.event.action, 'noser')
-      with:
-        SSH_PRIVATE_KEY: ${{ env.SSH_PRIVATE_KEY }}
-        ARGS: "-avr --timeout=600"
-        SSH_CMD_ARGS: "-o ServerAliveInterval=30 -o ServerAliveCountMax=10"
-        SOURCE: "openwrt/bin/packages/*/kiddin9/"
-        REMOTE_HOST: ${{ secrets.SERVER_HOST }}
-        REMOTE_USER: ${{ secrets.SERVER_USERNAME }}
-        REMOTE_PORT: ${{ secrets.SERVER_PORT }}
-        TARGET: "/www/wwwroot/dl.openwrt.ai/releases/25.12/packages/${{matrix.target}}/kiddin9/"
-        SCRIPT_AFTER: |
-            bash opkg ${{matrix.target}} &
 
     - name: Upload packages for artifact
       uses: actions/upload-artifact@main
