@@ -98,7 +98,7 @@ jobs:
     - name: Clone source code
       run: |
         set -v
-        REPO_BRANCH="25.12-SNAPSHOT"
+        REPO_BRANCH="25.12"
         #REPO_BRANCH="$(curl -gs -H 'Content-Type: application/json' \
         #   -H "Authorization: Bearer ${{ secrets.TOKEN_KIDDIN9 }}" \
         #   -X POST -d '{ "query": "query {repository(owner: \"openwrt\", name: \"openwrt\") {refs(refPrefix: \"refs/tags/\", last: 4, orderBy: {field: TAG_COMMIT_DATE, direction: ASC}) {edges {node {name}}}}}"}' https://api.github.com/graphql | jq -r '.data.repository.refs.edges[].node.name' | grep v23 | tail -n 1 | sed -e 's/v//')" || true
@@ -116,7 +116,6 @@ jobs:
         	echo "Primary download failed, trying mirror..."
         	wget -c -O sdk.tar.zst "$MIRROR_URL"
         }
-
 
     - name: Free up disk space
       env:
@@ -153,7 +152,17 @@ jobs:
           cd $rootdir
           }
         export -f git_clone_path
-        tar -xJf sdk.tar.zst -C openwrt || tar -xf sdk.tar.zst -C openwrt
+        
+        # 文件格式校验与解压
+        if [[ $(file sdk.tar.zst | grep "xz compressed data") ]]; then
+          tar -xJf sdk.tar.zst -C openwrt
+        else
+          tar -xzf sdk.tar.zst -C openwrt
+        fi
+
+        # 清理临时文件
+        rm -f sdk.tar.zst
+        
         cd openwrt
         cp -rf ./openwrt-sdk*/. ./ 2>/dev/null || true
         cp -rf ./openwrt-sdk*/build_dir/. ./build_dir/ || true
