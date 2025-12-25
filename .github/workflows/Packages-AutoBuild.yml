@@ -156,8 +156,10 @@ jobs:
         # 文件格式校验与解压
         if [[ $(file sdk.tar.zst | grep "xz compressed data") ]]; then
           tar -xJf sdk.tar.zst -C openwrt
-        else
+        elif [[ $(file sdk.tar.zst | grep "gzip compressed data") ]]; then
           tar -xzf sdk.tar.zst -C openwrt
+        else
+          tar -xf sdk.tar.zst -C openwrt
         fi
 
         # 清理临时文件
