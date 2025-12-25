@@ -83,7 +83,8 @@ jobs:
         sudo -E apt-get -qq install build-essential libncurses-dev zlib1g-dev gawk git \
         gettext libssl-dev xsltproc rsync wget unzip \
         llvm python3-pyelftools libpython3-dev aria2 jq qemu-utils rename \
-        libelf-dev libgmp3-dev libmpc-dev libfuse-dev bc autopoint upx
+        libelf-dev libgmp3-dev libmpc-dev libfuse-dev bc autopoint upx \
+        zstd
         sudo -E apt-get -qq autoremove --purge
         sudo -E apt-get -qq clean
         sudo timedatectl set-timezone "Asia/Shanghai"
@@ -152,11 +153,15 @@ jobs:
           cd $rootdir
           }
         export -f git_clone_path
+
+        sudo apt-get install -y zstd
         
         # 文件格式校验与解压
         if [[ $(file sdk.tar.zst | grep "xz compressed data") ]]; then
           tar -xJf sdk.tar.zst -C openwrt
         elif [[ $(file sdk.tar.zst | grep "gzip compressed data") ]]; then
+          tar -xzf sdk.tar.zst -C openwrt
+        elif [[ $(file sdk.tar.zst | grep "zstd compressed data") ]]; then
           tar -xzf sdk.tar.zst -C openwrt
         else
           tar -xf sdk.tar.zst -C openwrt
