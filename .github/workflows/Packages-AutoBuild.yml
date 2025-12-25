@@ -34,7 +34,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: ["mipsel_24kc","aarch64_cortex-a53"]
+        target: 
+           - mipsel_24kc
+           - aarch64_cortex-a53
         
     steps:
     - name: Checkout
