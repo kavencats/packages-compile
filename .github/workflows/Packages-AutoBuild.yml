@@ -113,9 +113,11 @@ jobs:
         PRIMARY_URL="https://downloads.openwrt.org/$SDK_PATH"
         MIRROR_URL="https://mirror-03.infra.openwrt.org/$SDK_PATH"
 
-        wget -c -O sdk.tar.zst "$PRIMARY_URL" || {
+        echo PRIMARY_URL
+
+        wget -c -O "$PRIMARY_URL" sdk.tar.zst || {
         	echo "Primary download failed, trying mirror..."
-        	wget -c -O sdk.tar.zst "$MIRROR_URL"
+        	wget -c -O "$MIRROR_URL" sdk.tar.zst
         }
 
     - name: Free up disk space
