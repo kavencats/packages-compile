@@ -34,7 +34,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: ["${{ github.event.client_payload.target }}"]
+        target: ["mipsel_24kc","aarch64_cortex-a53"]
         
     steps:
     - name: Checkout
